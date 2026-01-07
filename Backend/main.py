@@ -72,6 +72,65 @@ def images_to_gif():
         download_name='animated.gif'
     )
 
+@app.route('/resize_gif', methods=['POST'])
+
+def resize_gif():
+    if 'image' not in request.files:
+        abort(400, description="No image provided. Use form field name 'image'.")
+    if 'width' not in request.form or 'height' not in request.form:
+        abort(400, description="Width and height must be provided as form data.")
+
+    file = request.files['image']
+    width = int(request.form['width'])
+    height = int(request.form['height'])
+
+    
+
+    try:
+        img = Image.open(file.stream)
+        img = img.resize((width, height))
+        output = io.BytesIO()
+        img.save(output, format='GIF')
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='image/gif',
+            as_attachment=True,
+            download_name='resized.gif'
+        )
+    except Exception as e:
+        abort(500, description=f"Error resizing GIF: {str(e)}")
+
+
+@app.route('/crop_gif', methods=['POST'])
+def crop_gif():
+    if 'image' not in request.files:
+        abort(400, description="No image provided. Use form field name 'image'.")
+
+    if 'left' not in request.form or 'upper' not in request.form or 'right' not in request.form or 'lower' not in request.form:
+        abort(400, description="Crop coordinates (left, upper, right, lower) must be provided as form data.")
+
+    file = request.files['image']
+    left = int(request.form['left'])
+    upper = int(request.form['upper'])
+    right = int(request.form['right'])
+    lower = int(request.form['lower'])
+
+    try:
+        img = Image.open(file.stream)
+        img = img.crop((left, upper, right, lower))
+        output = io.BytesIO()
+        img.save(output, format='GIF')
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='image/gif',
+            as_attachment=True,
+            download_name='cropped.gif'
+        )
+    except Exception as e:
+        abort(500, description=f"Error cropping GIF: {str(e)}")
+        
 
 
 
