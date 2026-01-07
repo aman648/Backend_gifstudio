@@ -17,6 +17,20 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 def index():
     return "Editfy Working"
 
+
+@app.route('/vedio_gif', methods=['POST'])
+def vedio_gif():
+    if 'video' not in request.files:
+        abort(400, description="No video file provided. Use form field name 'video'.")
+
+    file = request.files['video']
+    if file.filename == '':
+        abort(400, description="Empty filename.")
+
+  
+
+  
+
 @app.route('/images-to-gif', methods=['POST'])
 def images_to_gif():
     if 'images' not in request.files:
@@ -136,4 +150,4 @@ def crop_gif():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0',port=9000)
