@@ -1,3 +1,4 @@
 flask
 PILLOW
 Werkzeug
+flask-cors
