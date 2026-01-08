@@ -134,6 +134,7 @@ def crop_gif():
     lower = int(request.form['lower'])
 
     try:
+        img = Image.open(file.stream)
         frames = []
         for frame in ImageSequence.Iterator(img):
             frame = frame.convert("RGBA")
