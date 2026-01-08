@@ -5,6 +5,8 @@ import os
 import io
 from werkzeug.utils import secure_filename
 
+
+Image.MAX_IMAGE_PIXELS = 500_000_000  # Increase max pixels to handle large images
 app = Flask(__name__)
 CORS(app)
 app.config['Max_length'] = 200*1024*1024 ## 200 MB
