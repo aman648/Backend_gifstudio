@@ -1,10 +1,12 @@
 from flask import Flask, request, send_file, abort
+from flask_cors import CORS
 from PIL import Image
 import os
 import io
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+CORS(app)
 app.config['Max_length'] = 200*1024*1024 ## 200 MB
 
 ##Directory to save uploads
@@ -14,6 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 @app.route('/')
+
 def index():
     return "Editfy Working"
 
