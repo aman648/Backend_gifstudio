@@ -1,6 +1,7 @@
 from flask import Flask, request, send_file, abort
 from flask_cors import CORS
 from PIL import Image,ImageSequence
+import subprocess
 import os
 import io
 from werkzeug.utils import secure_filename
@@ -27,14 +28,37 @@ def index():
 def vedio_gif():
     if 'video' not in request.files:
         abort(400, description="No video file provided. Use form field name 'video'.")
-
-    file = request.files['video']
-    if file.filename == '':
+    vedio = request.files['video']
+    if vedio.filename == '':
         abort(400, description="Empty filename.")
+    
+    width  = int(request.form.get('width', "320"))
+    fps    = 10
 
-  
+    try:
+        vedio_bytes = vedio.read()
+        command = ['ffmpeg',
+                   '-i', 'pipe:0',
+                   '-vf', f'scale={width},fps={fps}',
+                   '-f', 'gif',
+                   'pipe:1'
+        ]
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        gif_bytes, err = process.communicate(input=vedio_bytes)
+        if process.returncode != 0:
+            abort(500, description=f"FFmpeg error: {err.decode()}")
 
-  
+        return send_file(
+            io.BytesIO(gif_bytes),
+            mimetype='image/gif',
+            as_attachment=True,
+            download_name='output.gif'
+        )
+
+        
+    except Exception as e:
+        abort(500, description=f"Error converting video to GIF: {str(e)}")
+
 
 @app.route('/images-to-gif', methods=['POST'])
 def images_to_gif():
