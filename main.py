@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file, abort
 from flask_cors import CORS
-from PIL import Image
+from PIL import Image,ImageSequence
 import os
 import io
 from werkzeug.utils import secure_filename
@@ -134,16 +134,21 @@ def crop_gif():
     lower = int(request.form['lower'])
 
     try:
-        img = Image.open(file.stream)
-        img = img.crop((left, upper, right, lower))
+        frames = []
+        for frame in ImageSequence.Iterator(img):
+            frame = frame.convert("RGBA")
+            cropped = frame.crop((left, upper, right, lower))
+            frames.append(cropped)
+
         output = io.BytesIO()
-        img.save(output, format='GIF')
-        output.seek(0)
-        return send_file(
+        frames[0].save(
             output,
-            mimetype='image/gif',
-            as_attachment=True,
-            download_name='cropped.gif'
+            format="GIF",
+            save_all=True,
+            append_images=frames[1:],
+            loop=img.info.get("loop", 0),
+            duration=img.info.get("duration", 100),
+            disposal=2
         )
     except Exception as e:
         abort(500, description=f"Error cropping GIF: {str(e)}")
